@@ -12,6 +12,7 @@ import torch
 import torch.nn.functional as F
 from torchvision import transforms
 
+from fastapi.staticfiles import StaticFiles
 from model_training.src.model import ResNet9
 from model_training.src.utils import to_device, get_default_device
 
@@ -128,3 +129,8 @@ async def predict(file: UploadFile = File(...)):
 @app.get("/health")
 def health_check():
     return {"status": "ok", "model_loaded": model is not None, "classes": len(classes)}
+
+# Serve static files in production
+static_dir = os.path.join(BASE_DIR, "static")
+if os.path.exists(static_dir):
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
