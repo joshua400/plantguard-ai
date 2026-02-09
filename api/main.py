@@ -80,18 +80,6 @@ def predict_image(img_tensor, model):
     conf, preds = torch.max(probs, dim=1)
     return preds[0].item(), conf[0].item()
 
-@app.get("/")
-def read_root():
-    return {
-        "message": "Plant Disease Detection API is running",
-        "endpoints": {
-            "predict": "/predict (POST)",
-            "health": "/health (GET)",
-            "docs": "/docs (Swagger UI)"
-        },
-        "frontend": "Visit http://localhost:8080 to use the application"
-    }
-
 @app.post("/predict")
 async def predict(file: UploadFile = File(...)):
     if model is None:
