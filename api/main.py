@@ -32,36 +32,41 @@ device = get_default_device()
 classes = []
 
 # Model path
-MODEL_PATH = "plant-disease-model.pth"
-DATA_DIR = "input/new-plant-diseases-dataset/New Plant Diseases Dataset(Augmented)/New Plant Diseases Dataset(Augmented)/train"
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_PATH = os.path.join(BASE_DIR, "plant-disease-model.pth")
+
+# Hardcoded classes to avoid needing the dataset directory on Vercel
+classes = [
+    "Apple___Apple_scab", "Apple___Black_rot", "Apple___Cedar_apple_rust", "Apple___healthy",
+    "Blueberry___healthy", "Cherry_(including_sour)___Powdery_mildew", "Cherry_(including_sour)___healthy",
+    "Corn_(maize)___Cercospora_leaf_spot Gray_leaf_spot", "Corn_(maize)___Common_rust_",
+    "Corn_(maize)___Northern_Leaf_Blight", "Corn_(maize)___healthy", "Grape___Black_rot",
+    "Grape___Esca_(Black_Measles)", "Grape___Leaf_blight_(Isariopsis_Leaf_Spot)", "Grape___healthy",
+    "Orange___Haunglongbing_(Citrus_greening)", "Peach___Bacterial_spot", "Peach___healthy",
+    "Pepper,_bell___Bacterial_spot", "Pepper,_bell___healthy", "Potato___Early_blight",
+    "Potato___Late_blight", "Potato___healthy", "Raspberry___healthy", "Soybean___healthy",
+    "Squash___Powdery_mildew", "Strawberry___Leaf_scorch", "Strawberry___healthy",
+    "Tomato___Bacterial_spot", "Tomato___Early_blight", "Tomato___Late_blight", "Tomato___Leaf_Mold",
+    "Tomato___Septoria_leaf_spot", "Tomato___Spider_mites Two-spotted_spider_mite",
+    "Tomato___Target_Spot", "Tomato___Tomato_Yellow_Leaf_Curl_Virus",
+    "Tomato___Tomato_mosaic_virus", "Tomato___healthy"
+]
 
 def load_model():
-    global model, classes
+    global model
     
-    # Load classes from dataset directory if available
-    if os.path.exists(DATA_DIR):
-        classes = sorted(os.listdir(DATA_DIR))
-        print(f"Loaded {len(classes)} classes from {DATA_DIR}")
-    else:
-        print("Warning: Dataset directory not found. Classes will be empty until fixed.")
-        # Fallback list or empty
-        classes = []
-
     # Initialize model structure
-    if classes:
-        model = ResNet9(3, len(classes))
-        
-        # Load weights if trained model exists
-        if os.path.exists(MODEL_PATH):
-            print(f"Loading model weights from {MODEL_PATH}")
-            model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
-        else:
-            print("Warning: Trained model file not found. Using random weights.")
-            
+    model = ResNet9(3, len(classes))
+    
+    # Load weights if trained model exists
+    if os.path.exists(MODEL_PATH):
+        print(f"Loading model weights from {MODEL_PATH}")
+        model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
         model = to_device(model, device)
         model.eval()
     else:
-        print("Error: Could not determine classes, model not initialized.")
+        print(f"Error: Trained model file not found at {MODEL_PATH}")
+        model = None
 
 @app.on_event("startup")
 async def startup_event():
