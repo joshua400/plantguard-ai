@@ -56,7 +56,7 @@ const CheckDisease = () => {
       const formData = new FormData();
       formData.append("file", image);
 
-      const response = await fetch("/api/predict", {
+      const response = await fetch("/predict", {
         method: "POST",
         body: formData,
       });
